@@ -31,7 +31,9 @@ func NewStringResponseHTTP(res *http.Response) (string, error) {
 	return string(b), err
 }
 
-func makeRequest(body, headers map[string]string, endpoint, method string) *http.Request {
+// MakeRequest allows to make custom request using body, headers, url and a method
+// Most likely wrapped by more practical functions (cf: SendXWWWFormUrlEncodedRequest)
+func MakeRequest(body, headers map[string]string, endpoint, method string) *http.Request {
 	var dataSerialized io.Reader
 	data := url.Values{}
 
@@ -56,8 +58,17 @@ func makeRequest(body, headers map[string]string, endpoint, method string) *http
 	return req
 }
 
-func sendSimpleGetRequest(body, headers HttpValues, endpoint string) (*http.Response, error) {
+// SendXWWWFormUrlEncodedRequest sends a x-www-form-url-encoded thru POST method
+func SendXWWWFormUrlEncodedRequest(body, headers HttpValues, endpoint string) (*http.Response, error) {
 	client := &http.Client{}
-	req := makeRequest(body, headers, endpoint, "GET")
+	req := MakeRequest(body, headers, endpoint, "POST")
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	return client.Do(req)
+}
+
+// SendSimpleGetRequest allow to send get request to an url
+func SendSimpleGetRequest(body, headers HttpValues, endpoint string) (*http.Response, error) {
+	client := &http.Client{}
+	req := MakeRequest(body, headers, endpoint, "GET")
 	return client.Do(req)
 }

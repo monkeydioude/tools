@@ -5,6 +5,7 @@ import (
 	"regexp"
 )
 
+// MatchAndFind match a target to a pattern and return the result parts
 func MatchAndFind(pattern, target string) ([]string, error) {
 	r, err := regexp.Compile(pattern)
 
