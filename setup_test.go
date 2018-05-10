@@ -12,6 +12,12 @@ func assertEqual(t *testing.T, a interface{}, b interface{}) {
 	}
 }
 
+func assertDiff(t *testing.T, a interface{}, b interface{}) {
+	if a == b {
+		t.Fatalf("%s != %s", a, b)
+	}
+}
+
 type dummyReadCloser struct {
 	fr     io.Reader
 	isRead bool
