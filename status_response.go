@@ -9,22 +9,22 @@ const (
 	notFound = "Not Found"
 )
 
-func response404(err error) ([]byte, int, error) {
+func Response404(err error) ([]byte, int, error) {
 	return nil, 404, err
 }
 
-func response500(err error) ([]byte, int, error) {
+func Response500(err error) ([]byte, int, error) {
 	return nil, 500, err
 }
 
-func response200(data []byte) ([]byte, int, error) {
+func Response200(data []byte) ([]byte, int, error) {
 	return data, 200, nil
 }
 
-func httpResponse(rw http.ResponseWriter, msg string, code int) {
+func HttpResponse(rw http.ResponseWriter, msg string, code int) {
 	http.Error(rw, fmt.Sprintf(`{"code": %d, "message": "%s"}`, code, msg), code)
 }
 
-func httpNotFound(rw http.ResponseWriter) {
-	httpResponse(rw, notFound, 404)
+func HttpNotFound(rw http.ResponseWriter) {
+	HttpResponse(rw, notFound, 404)
 }
