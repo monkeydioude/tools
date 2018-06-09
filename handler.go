@@ -16,7 +16,7 @@ type Handler struct {
 	Routes  Routes
 }
 
-type HandlerFunc func([]string, *Configuration) ([]byte, int, error)
+type Xer func([]string, *Configuration) ([]byte, int, error)
 
 type Route struct {
 	Handler func([]string, *Configuration) ([]byte, int, error)
@@ -74,13 +74,13 @@ func NewHandler(conf *Configuration) *Handler {
 	}
 }
 
-func (routes *Routes) Add(r, m string, f HandlerFunc) {
+func (routes *Routes) Add(r, m string, f Xer) {
 	(*routes)[r] = &Route{
 		Method:  m,
 		Handler: f,
 	}
 }
 
-func (routes *Routes) AddGet(r string, f HandlerFunc) {
+func (routes *Routes) AddGet(r string, f Xer) {
 	routes.Add(r, "GET", f)
 }
