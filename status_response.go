@@ -9,6 +9,14 @@ const (
 	notFound = "Not Found"
 )
 
+type ResponseError struct {
+	msg string
+}
+
+func (r ResponseError) String() string {
+	return ""
+}
+
 func Response404(err error) ([]byte, int, error) {
 	return nil, 404, err
 }
