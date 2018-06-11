@@ -2,7 +2,6 @@ package tools
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -16,7 +15,7 @@ type HttpValues map[string]string
 // NewBytesResponseHTTP return stream response as slice of bytes (standard behavior)
 func NewBytesResponseHTTP(res *http.Response) ([]byte, error) {
 	if res.ContentLength <= 0 {
-		return nil, errors.New("Wrong Response Content. Response might be empty")
+		res.ContentLength = 255
 	}
 	buf := bytes.NewBuffer(make([]byte, 0, res.ContentLength))
 	_, err := buf.ReadFrom(res.Body)
