@@ -2,6 +2,7 @@ package tools
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -14,13 +15,16 @@ type HttpValues map[string]string
 
 // NewBytesResponseHTTP return stream response as slice of bytes (standard behavior)
 func NewBytesResponseHTTP(res *http.Response) ([]byte, error) {
+	if res.ContentLength <= 0 {
+		return nil, errors.New("Wrong Response Content. Response might be empty")
+	}
 	buf := bytes.NewBuffer(make([]byte, 0, res.ContentLength))
 	_, err := buf.ReadFrom(res.Body)
 	if err != nil {
-		return nil, fmt.Errorf("[ERR ] Could not read Response's Body: %s", err)
+		return nil, fmt.Errorf("Could not read Response's Body: %s", err)
 	}
 	if res.StatusCode != 200 {
-		log.Printf("[ERR ] Error in response, StatusCode=%d, reason:%s", res.StatusCode, buf.String())
+		log.Printf("Error in response, StatusCode=%d, reason:%s", res.StatusCode, buf.String())
 	}
 	return buf.Bytes(), nil
 }
@@ -48,7 +52,7 @@ func MakeRequest(body, headers map[string]string, endpoint, method string) *http
 	req, err := http.NewRequest(method, endpoint, dataSerialized)
 
 	if err != nil {
-		log.Printf("[ERR ] Could not make request Client: %s", err)
+		log.Printf("Could not make request Client: %s", err)
 		return nil
 	}
 
