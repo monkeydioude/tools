@@ -19,3 +19,18 @@ func MatchAndFind(pattern, target string) ([]string, error) {
 
 	return r.FindStringSubmatch(target), nil
 }
+
+// MatchAndFindAll match a target to a pattern and return all the result parts
+func MatchAndFindAll(pattern, target string) ([][]string, error) {
+	r, err := regexp.Compile(pattern)
+
+	if err != nil {
+		return nil, fmt.Errorf("[WARN] %s", err)
+	}
+
+	if !r.MatchString(target) {
+		return nil, fmt.Errorf("[WARN] Target '%s' did not match against '%s'", target, pattern)
+	}
+
+	return r.FindAllStringSubmatch(target, -1), nil
+}
