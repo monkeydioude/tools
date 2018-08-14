@@ -11,7 +11,7 @@ import (
 // RequestEntity sends a request, read response body and json.Unmarshal into the passed entity
 func RequestEntity(method string, body, headers tools.HttpValues, endpoint string, entity interface{}) (interface{}, error) {
 	client := &http.Client{}
-	req := tools.MakeRequest(body, headers, endpoint, "GET")
+	req := tools.MakeRequest(body, headers, endpoint, method)
 	if req == nil {
 		return nil, errors.New("Request was empty")
 	}
@@ -36,4 +36,9 @@ func RequestEntity(method string, body, headers tools.HttpValues, endpoint strin
 // GetEntity calls RequestJsonEntity forcing a GET method
 func GetEntity(body, headers tools.HttpValues, endpoint string, entity interface{}) (interface{}, error) {
 	return RequestEntity("GET", body, headers, endpoint, entity)
+}
+
+// PostEntity calls RequestJsonEntity forcing a POST method
+func PostEntity(body, headers tools.HttpValues, endpoint string, entity interface{}) (interface{}, error) {
+	return RequestEntity("POST", body, headers, endpoint, entity)
 }
