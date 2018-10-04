@@ -3,6 +3,7 @@ package http
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 )
@@ -35,7 +36,13 @@ func NewStringResponseHTTP(res *http.Response) (string, error) {
 // BuildRequest allows to make custom request using body, headers, url and a method
 // Most likely wrapped by more practical functions (cf: SendXWWWFormUrlEncodedRequest)
 func BuildRequest(body Body, headers map[string]string, endpoint, method string) *http.Request {
-	req, err := http.NewRequest(method, endpoint, body.GetBody())
+	var b io.Reader
+
+	if body != nil {
+		b = body.GetBody()
+	}
+
+	req, err := http.NewRequest(method, endpoint, b)
 
 	if err != nil {
 		log.Printf("Could not make request Client: %s", err)
