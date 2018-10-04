@@ -1,15 +1,13 @@
-package tools
+package http
 
 import (
 	"bytes"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
-	"net/url"
-	"strings"
 )
 
+// Values is a helper to build simple Headers
 type HttpValues map[string]string
 
 // NewBytesResponseHTTP return stream response as slice of bytes (standard behavior)
@@ -34,21 +32,10 @@ func NewStringResponseHTTP(res *http.Response) (string, error) {
 	return string(b), err
 }
 
-// MakeRequest allows to make custom request using body, headers, url and a method
+// BuildRequest allows to make custom request using body, headers, url and a method
 // Most likely wrapped by more practical functions (cf: SendXWWWFormUrlEncodedRequest)
-func MakeRequest(body, headers map[string]string, endpoint, method string) *http.Request {
-	var dataSerialized io.Reader
-	data := url.Values{}
-
-	for k, v := range body {
-		data.Set(k, v)
-	}
-
-	if len(data) > 0 {
-		dataSerialized = strings.NewReader(data.Encode())
-	}
-
-	req, err := http.NewRequest(method, endpoint, dataSerialized)
+func BuildRequest(body Body, headers map[string]string, endpoint, method string) *http.Request {
+	req, err := http.NewRequest(method, endpoint, body.GetBody())
 
 	if err != nil {
 		log.Printf("Could not make request Client: %s", err)
@@ -61,17 +48,19 @@ func MakeRequest(body, headers map[string]string, endpoint, method string) *http
 	return req
 }
 
-// SendXWWWFormUrlEncodedRequest sends a x-www-form-url-encoded thru POST method
-func SendXWWWFormUrlEncodedRequest(body, headers HttpValues, endpoint string) (*http.Response, error) {
+func Request(body Body, headers map[string]string, endpoint, method string) (*http.Response, error) {
 	client := &http.Client{}
-	req := MakeRequest(body, headers, endpoint, "POST")
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req := BuildRequest(body, headers, endpoint, method)
 	return client.Do(req)
 }
 
+// SendXWWWFormUrlEncodedRequest sends a x-www-form-url-encoded thru POST method
+func SendXWWWFormUrlEncodedRequest(body Body, headers map[string]string, endpoint string) (*http.Response, error) {
+	headers["Content-Type"] = "application/x-www-form-urlencoded"
+	return Request(body, headers, endpoint, "POST")
+}
+
 // SendSimpleGetRequest allow to send get request to an url
-func SendSimpleGetRequest(body, headers HttpValues, endpoint string) (*http.Response, error) {
-	client := &http.Client{}
-	req := MakeRequest(body, headers, endpoint, "GET")
-	return client.Do(req)
+func SendSimpleGetRequest(body Body, headers map[string]string, endpoint string) (*http.Response, error) {
+	return Request(body, headers, endpoint, "GET")
 }
