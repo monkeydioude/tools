@@ -14,7 +14,7 @@ import (
 //
 // Must only contains a Do() method
 type Client interface {
-	Do(Body, map[string]string, string, string)
+	Do(Body, Values, string, string) (*http.Response, error)
 }
 
 // Request simply wraps around net/http
@@ -78,12 +78,12 @@ func BuildRequest(body Body, headers Values, endpoint, method string) *http.Requ
 }
 
 // Request is a helper using DefaultClient
-func Request(body Body, headers map[string]string, endpoint, method string) (*http.Response, error) {
+func Request(body Body, headers Values, endpoint, method string) (*http.Response, error) {
 	return DefaultClient.Do(body, headers, endpoint, method)
 }
 
 // Do implements Client interface
-func (r *Default) Do(body Body, headers map[string]string, endpoint, method string) (*http.Response, error) {
+func (r *Default) Do(body Body, headers Values, endpoint, method string) (*http.Response, error) {
 	req := BuildRequest(body, headers, endpoint, method)
 	return r.Client.Do(req)
 }
