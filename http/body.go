@@ -47,7 +47,7 @@ type ValuesBody struct {
 }
 
 // NewValuesBody generates pointer to ValuesBody from HttpValues var
-func NewValuesBody(body HttpValues) *ValuesBody {
+func NewValuesBody(body Values) *ValuesBody {
 	data := url.Values{}
 
 	for k, v := range body {

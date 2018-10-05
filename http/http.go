@@ -6,10 +6,32 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"time"
 )
 
-// Values is a helper to build simple Headers
-type HttpValues map[string]string
+// Client is an interface meant to wrap around net/http package
+// for mocking purpose.
+//
+// Must only contains a Do() method
+type Client interface {
+	Do(Body, map[string]string, string, string)
+}
+
+// Request simply wraps around net/http
+type Default struct {
+	Client *http.Client
+}
+
+// DefaultClient is used by every helper function
+// as a base client
+var DefaultClient = &Default{
+	Client: &http.Client{
+		Timeout: time.Second * 10,
+	},
+}
+
+// Values is meant to stock Headers and Body values
+type Values map[string]string
 
 // NewBytesResponseHTTP return stream response as slice of bytes (standard behavior)
 func NewBytesResponseHTTP(res *http.Response) ([]byte, error) {
@@ -35,7 +57,7 @@ func NewStringResponseHTTP(res *http.Response) (string, error) {
 
 // BuildRequest allows to make custom request using body, headers, url and a method
 // Most likely wrapped by more practical functions (cf: SendXWWWFormUrlEncodedRequest)
-func BuildRequest(body Body, headers map[string]string, endpoint, method string) *http.Request {
+func BuildRequest(body Body, headers Values, endpoint, method string) *http.Request {
 	var b io.Reader
 
 	if body != nil {
@@ -55,19 +77,24 @@ func BuildRequest(body Body, headers map[string]string, endpoint, method string)
 	return req
 }
 
+// Request is a helper using DefaultClient
 func Request(body Body, headers map[string]string, endpoint, method string) (*http.Response, error) {
-	client := &http.Client{}
-	req := BuildRequest(body, headers, endpoint, method)
-	return client.Do(req)
+	return DefaultClient.Do(body, headers, endpoint, method)
 }
 
-// SendXWWWFormUrlEncodedRequest sends a x-www-form-url-encoded thru POST method
-func SendXWWWFormUrlEncodedRequest(body Body, headers map[string]string, endpoint string) (*http.Response, error) {
+// Do implements Client interface
+func (r *Default) Do(body Body, headers map[string]string, endpoint, method string) (*http.Response, error) {
+	req := BuildRequest(body, headers, endpoint, method)
+	return r.Client.Do(req)
+}
+
+// SendXWWWFormURLEncodedRequest sends a x-www-form-url-encoded thru POST method
+func SendXWWWFormURLEncodedRequest(body Body, headers map[string]string, endpoint string) (*http.Response, error) {
 	headers["Content-Type"] = "application/x-www-form-urlencoded"
-	return Request(body, headers, endpoint, "POST")
+	return DefaultClient.Do(body, headers, endpoint, "POST")
 }
 
 // SendSimpleGetRequest allow to send get request to an url
 func SendSimpleGetRequest(body Body, headers map[string]string, endpoint string) (*http.Response, error) {
-	return Request(body, headers, endpoint, "GET")
+	return DefaultClient.Do(body, headers, endpoint, "GET")
 }
