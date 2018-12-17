@@ -1,0 +1,11 @@
+{
+    "creation": 1534094224,
+    "expiration": 1597252624,
+    "data": {
+        "lvl1": {
+            "lvl2": {
+                "test": "kikoo"
+            }
+        } 
+    }
+}

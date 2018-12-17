@@ -2,40 +2,69 @@ package cache
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"time"
 )
 
-type Cache struct {
-	Creation   int64       `json:"creation"`
-	Expiration int64       `json:"expiration"`
-	Data       interface{} `json:"data"`
-	Rotting    int64       `json:"rotting"`
+type Cache interface {
+	GetExpiration() int64
+	GetData() interface{}
+	Write(path string)
 }
 
-func (c *Cache) IsExpired() bool {
+type FileCache struct {
+	path       string
+	Expiration int64       `json:"expiration"`
+	Data       interface{} `json:"data"`
+}
+
+func (c *FileCache) IsExpired() bool {
 	return time.Now().Unix() >= c.Expiration
 }
 
-func (c *Cache) IsValid() bool {
+func (c *FileCache) IsValid() bool {
 	return !c.IsExpired()
 }
 
-func (c *Cache) TimeRemaining() int64 {
+func (c *FileCache) TimeRemaining() int64 {
 	return time.Now().Unix() - c.Expiration
 }
 
-func Parse(path string, data interface{}) (*Cache, error) {
+func ParseFileCache(path string, data interface{}) (*FileCache, error) {
 	f, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
 
-	c := &Cache{Data: data}
+	c := &FileCache{Data: data}
 
 	if err := json.Unmarshal(f, c); err != nil {
 		return nil, err
 	}
 
 	return c, nil
+}
+
+func NewFileCache(path string) *FileCache {
+	return &FileCache{
+		path: path,
+	}
+}
+
+func (c *FileCache) Write(data interface{}, expiration int64) error {
+	c.Data = data
+	c.Expiration = expiration
+
+	cache, err := json.Marshal(c)
+	if err != nil {
+		fmt.Printf("[ERR ] Could not marshal data. Reason: %s\n", err)
+		return err
+	}
+
+	return ioutil.WriteFile(c.path, cache, 0666)
+}
+
+func (c *FileCache) GetData() interface{} {
+	return c.Data
 }
