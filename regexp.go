@@ -34,3 +34,13 @@ func MatchAndFindAll(pattern, target string) ([][]string, error) {
 
 	return r.FindAllStringSubmatch(target, -1), nil
 }
+
+func Match(pattern, target string) bool {
+	r, err := regexp.Compile(pattern)
+
+	if err != nil {
+		return false
+	}
+
+	return r.MatchString(target)
+}
